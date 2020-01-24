@@ -1004,8 +1004,6 @@ class Graph(object):
             shape = self.get_shape(name)
 
             utils.make_sure(dtype is not None, "missing output dtype for " + name)
-            if shape == None:
-              shape = [-1]
             utils.make_sure(shape is not None, "missing output shape for " + name)
 
             v = utils.make_onnx_inputs_outputs(name, dtype, shape)

@@ -85,6 +85,8 @@ def tflist_to_onnx(node_list, shape_override):
             input_names = [i.name for i in node.inputs]
             output_names = [i.name for i in node.outputs]
             onnx_node = helper.make_node(op_type='PyOp', inputs=input_names[1:], outputs=output_names, name=node.name, module='external_ops', class_name=node.type)
+            for ot_n in output_names:
+                output_shapes[ot_n] = [-1]
             onnx_nodes.append(onnx_node)
             continue
         '''
