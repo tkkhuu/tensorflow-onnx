@@ -71,6 +71,31 @@ def tflist_to_onnx(node_list, shape_override):
         attr = {}
         takeit = True
         op_cnt[node.type] += 1
+        if node.type in ['IteratorV2','IteratorGetNext']:
+            input_names = [i.name for i in node.inputs]
+            output_names = [i.name for i in node.outputs]
+            onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name)
+            onnx_nodes.append(onnx_node)
+            continue
+        if node.type == 'IteratorV2':
+            continue
+        if node.type == 'HashTableV2':
+            continue
+        if node.type == 'LookupTableFindV2':
+            input_names = [i.name for i in node.inputs]
+            output_names = [i.name for i in node.outputs]
+            onnx_node = helper.make_node(op_type='PyOp', inputs=input_names[1:], outputs=output_names, name=node.name, module='external_ops', class_name=node.type)
+            onnx_nodes.append(onnx_node)
+            continue
+        '''
+        if node.type == 'IteratorGetNext':
+            output_names = [i.name for i in node.outputs]
+            input_node_0 = helper.make_node('Placeholder',inputs=[],outputs=[output_names[0]],name=output_names[0])
+            input_node_1 = helper.make_node('Placeholder',inputs=[],outputs=[output_names[1]],name=output_names[1])
+            onnx_nodes.append(input_node_0)
+            onnx_nodes.append(input_node_1)
+            continue
+        '''
         for a in node.node_def.attr:
             attr_cnt[a] += 1
             if a == "dtype":

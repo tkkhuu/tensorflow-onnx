@@ -54,6 +54,8 @@ class LoopRewriter(LoopRewriterBase):
             body_outputs = cond_g_info.outputs + cell_g_info.outputs
             for out_tensor_value_info in body_outputs:
                 shape = out_tensor_value_info.shape
+                if shape == None:
+                  shape = [-1,-1]
                 utils.make_sure(
                     shape is not None,
                     "Conversion of Loop requries output shape [{}] exists".format(out_tensor_value_info.id)

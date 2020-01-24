@@ -35,6 +35,10 @@ def freeze_session(sess, keep_var_names=None, output_names=None, clear_devices=T
                 node.device = ""
         frozen_graph = convert_variables_to_constants(sess, input_graph_def,
                                                       output_names, freeze_var_names)
+        '''
+        with tf.gfile.GFile('/tmp/nmt_model/frozen_graph.pb', "wb") as f:
+            f.write(frozen_graph.SerializeToString())
+        '''
         return frozen_graph
 
 
