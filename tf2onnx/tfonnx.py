@@ -82,6 +82,8 @@ def tflist_to_onnx(node_list, shape_override):
         if node.type == 'HashTableV2':
             continue
         if node.type == 'LookupTableFindV2':
+            continue
+            '''
             input_names = [i.name for i in node.inputs]
             output_names = [i.name for i in node.outputs]
             onnx_node = helper.make_node(op_type='PyOp', inputs=input_names[1:], outputs=output_names, name=node.name, module='external_ops', class_name=node.type)
@@ -89,6 +91,20 @@ def tflist_to_onnx(node_list, shape_override):
                 output_shapes[ot_n] = [-1]
             onnx_nodes.append(onnx_node)
             continue
+            '''
+        if node.name == 'dynamic_seq2seq/Cast_1':
+           onnx_node = helper.make_node('Constant',name='dynamic_seq2seq/Cast_1',inputs=[],outputs=['dynamic_seq2seq/Cast_1:0'], value=np.array([2]).astype(np.int32))
+           onnx_nodes.append(onnx_node)
+           continue
+        if node.name == 'dynamic_seq2seq/Cast':
+           onnx_node = helper.make_node('Constant',name='dynamic_seq2seq/Cast',inputs=[],outputs=['dynamic_seq2seq/Cast:0'], value=np.array([1]).astype(np.int32))
+           onnx_nodes.append(onnx_node)
+           '''
+           print (onnx_node.output)
+           print ("founded const cast input")
+           tt = input('tt')
+           '''
+           continue
         '''
         if node.type == 'IteratorGetNext':
             output_names = [i.name for i in node.outputs]
