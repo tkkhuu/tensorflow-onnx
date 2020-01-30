@@ -71,12 +71,14 @@ def tflist_to_onnx(node_list, shape_override):
         attr = {}
         takeit = True
         op_cnt[node.type] += 1
+        '''
         if node.type in ['IteratorV2','IteratorGetNext']:
             input_names = [i.name for i in node.inputs]
             output_names = [i.name for i in node.outputs]
             onnx_node = helper.make_node(node.type, input_names, output_names, name=node.name)
             onnx_nodes.append(onnx_node)
             continue
+        '''
         if node.type == 'IteratorV2':
             continue
         if node.type == 'HashTableV2':
@@ -92,12 +94,14 @@ def tflist_to_onnx(node_list, shape_override):
             onnx_nodes.append(onnx_node)
             continue
             '''
-        if node.name == 'dynamic_seq2seq/Cast_1':
-           onnx_node = helper.make_node('Constant',name='dynamic_seq2seq/Cast_1',inputs=[],outputs=['dynamic_seq2seq/Cast_1:0'], value=np.array([2]).astype(np.int32))
+        if node.name == 'dynamic_seq2seq/Cast':
+           value = np.array([1]).astype(np.int32)
+           onnx_node = helper.make_node('Const',name='dynamic_seq2seq/Cast',inputs=[],outputs=['dynamic_seq2seq/Cast:0'],value=helper.make_tensor(name='const_1',data_type=onnx_pb.TensorProto.INT32,dims=value.shape,vals=value))
            onnx_nodes.append(onnx_node)
            continue
-        if node.name == 'dynamic_seq2seq/Cast':
-           onnx_node = helper.make_node('Constant',name='dynamic_seq2seq/Cast',inputs=[],outputs=['dynamic_seq2seq/Cast:0'], value=np.array([1]).astype(np.int32))
+        if node.name == 'dynamic_seq2seq/Cast_1':
+           value = np.array([2]).astype(np.int32)
+           onnx_node = helper.make_node('Const',name='dynamic_seq2seq/Cast_1',inputs=[],outputs=['dynamic_seq2seq/Cast_1:0'],value=helper.make_tensor(name='const_2',data_type=onnx_pb.TensorProto.INT32,dims=value.shape,vals=value))
            onnx_nodes.append(onnx_node)
            '''
            print (onnx_node.output)
@@ -105,7 +109,6 @@ def tflist_to_onnx(node_list, shape_override):
            tt = input('tt')
            '''
            continue
-        '''
         if node.type == 'IteratorGetNext':
             output_names = [i.name for i in node.outputs]
             input_node_0 = helper.make_node('Placeholder',inputs=[],outputs=[output_names[0]],name=output_names[0])
@@ -113,7 +116,6 @@ def tflist_to_onnx(node_list, shape_override):
             onnx_nodes.append(input_node_0)
             onnx_nodes.append(input_node_1)
             continue
-        '''
         for a in node.node_def.attr:
             attr_cnt[a] += 1
             if a == "dtype":
