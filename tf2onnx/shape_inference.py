@@ -22,7 +22,7 @@ from tf2onnx.tf_loader import tf_reload_graph
 logger = logging.getLogger(__name__)
 
 
-def infer_shape(tf_graph, shape_override):
+def infer_shape(tf_graph, shape_override, per_op_reload=False):
     """Infer shape for TF graph with shape_override set first."""
     if shape_override:
         logger.info("Apply shape override:")
@@ -31,7 +31,7 @@ def infer_shape(tf_graph, shape_override):
             tf_graph.get_tensor_by_name(name).set_shape(shape)
         tf_graph = tf_reload_graph(tf_graph)
 
-    tf_graph = infer_shape_for_graph(tf_graph)
+    tf_graph = infer_shape_for_graph(tf_graph, per_op_reload=per_op_reload)
 
     op_outputs_with_none_shape = check_shape_for_tf_graph(tf_graph)
     if op_outputs_with_none_shape:
@@ -63,7 +63,7 @@ def check_shape_for_tf_graph(tf_graph):
     return op_outputs_mapping_none_shape
 
 
-def infer_shape_for_graph(tf_graph):
+def infer_shape_for_graph(tf_graph, per_op_reload=False):
     """
     Infer shape for Tensorflow ops.
     Tensorflow explicitly sets shape for some ops in python code, such as Switch, Merge and TensorArrayGather.
@@ -81,6 +81,8 @@ def infer_shape_for_graph(tf_graph):
             updated = infer_shape_for_op(o)
             if updated:
                 shape_updated = True
+                if per_op_reload:
+                    break
         if shape_updated:
             tf_graph = tf_reload_graph(tf_graph)
     return tf_graph

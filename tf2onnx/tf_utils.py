@@ -57,7 +57,7 @@ def tf_to_onnx_tensor(tensor, name=""):
         # assume np_data is string, numpy_helper.from_array accepts ndarray,
         # in which each item is of str while the whole dtype is of object.
         try:
-            if len(np_data.shape) > 0:
+            if np_data.shape:
                 np_data = np_data.astype(np.str).astype(np.object)
             else:
                 np_data = np.array(str(np_data)).astype(np.object)
@@ -203,6 +203,8 @@ def tflist_to_onnx(g, shape_override):
                 attr["to"] = map_tf_dtype(get_tf_node_attr(node, "DstT"))
             elif a == "SrcT":
                 continue
+            elif a == "incompatible_shape_error":
+                logger.warning("incompatible shape reported from tf, node=%s", node.name)
             elif a in ignored_attr:
                 continue
             else:
