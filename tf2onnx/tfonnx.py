@@ -368,10 +368,10 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
     is_func = is_function(tf_graph)
     if not is_func:  # FIXME: do we need this ?
         try:
-            per_op_reload = target and TARGET_INFERRELOAD in target
+            per_op_reload = target and constants.TARGET_INFERRELOAD in target
             tf_graph = infer_shape(tf_graph, shape_override, per_op_reload=per_op_reload)
         except Exception as ex:
-            logger.warning("failed to change shapes, %s\ttry running with --target=inferreload", ex)
+            logger.warning("failed to change shapes, try running with --target=inferreload, %s", ex)
 
     if shape_override is None:
         shape_override = {}
@@ -465,16 +465,6 @@ def process_tf_graph(tf_graph, continue_on_error=False, verbose=False, target=No
 
     if custom_rewriter is not None:
         rewriters.extend(custom_rewriter)
-
-    for n in g.get_nodes():
-        for o in n.output:
-            shape = g.get_shape(o)
-            if shape is None:
-                print("{} {} has no shape".format(n.type, o))
-                for i in n.input:
-                    shape = g.get_shape(i)
-                    if shape is not None:
-                        print("\tbut input {} has shape".format(i))
 
     run_rewriters(g, rewriters, continue_on_error)
 
