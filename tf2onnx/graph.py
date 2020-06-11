@@ -50,6 +50,12 @@ class Node(object):
             self._attr[a.name] = a
         self._skip_conversion = skip_conversion
 
+    def __deepcopy__(self, memo):
+        # print ("node deepcopy:", self._op.name)
+        new_node = Node(copy.deepcopy(self._op), self.graph, self._skip_conversion)
+        # print ("done")
+        return new_node
+
     @property
     def input(self):
         return self._input
@@ -457,6 +463,37 @@ class Graph(object):
                 self.make_node("Identity", [new_output_name], outputs=[o], op_name_scope=n.name + "_" + "graph_outputs")
                 self.copy_shape(new_output_name, o)
                 self.copy_dtype(new_output_name, o)
+
+    def clone(self):
+        memo = {}
+        print ("clone graph:", self.graph_name)
+        print ("clone nodes")
+        new_nodes = copy.deepcopy(self._nodes, memo),
+        print ("clone shapes")
+        #new_shapes = copy.deepcopy(self._output_shapes, memo)
+        new_shapes = {}
+        for key in self._output_shapes:
+            shape = self._output_shapes[key]
+            new_shape = [dim for dim in shape]
+            new_shapes[key] = new_shape
+        print ("clone types")
+        new_types = copy.deepcopy(self._dtypes, memo)
+        print ("clone target")
+        new_target = copy.deepcopy(self._target, memo)
+        print ("clone opset")
+        new_opset = copy.deepcopy(self._opset, memo)
+        print ("clone extra opset")
+        new_ex_opset = copy.deepcopy(self._extra_opset, memo)
+        print ("clone outputs")
+        input()
+        new_outputs = copy.deepcopy(self.outputs, memo)
+        new_graph = Graph(new_nodes, new_shapes, new_types, new_target,
+                          new_opset, new_ex_opset, new_outputs,
+                          self._is_subgraph,
+                          self.graph_name)
+        print ("done")
+        return new_graph
+
 
     def create_new_graph_with_same_config(self):
         """Create a clean graph inheriting current graph's configuration."""

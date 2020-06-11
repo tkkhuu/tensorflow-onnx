@@ -47,7 +47,8 @@ def optimize_graph(graph):
         for name, factory in opts.items():
             try:
                 logger.verbose("Apply %s", name)
-                current = copy.deepcopy(graph)
+                # current = copy.deepcopy(graph)
+                current = graph.clone()
                 opt = factory()
                 graph = opt.optimize(current) or graph
                 continue_flag = continue_flag or opt.graph_been_opt
