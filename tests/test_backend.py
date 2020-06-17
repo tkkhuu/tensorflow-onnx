@@ -43,6 +43,13 @@ _TFINPUT2 = "input2"
 _INPUT2 = "input2:0"
 _TFINPUT3 = "input3"
 _INPUT3 = "input3:0"
+_TFINPUT4 = "input4"
+_INPUT4 = "input4:0"
+_TFINPUT5 = "input5"
+_INPUT5 = "input5:0"
+_TFINPUT6 = "input6"
+_INPUT6 = "input6:0"
+
 _TFOUTPUT = "output"
 _OUTPUT = "output:0"
 _TFOUTPUT1 = "output1"
@@ -169,7 +176,7 @@ class BackendTests(Tf2OnnxBackendTestBase):
         kwargs["convert_var_to_const"] = False
         kwargs["constant_fold"] = False
         return self.run_test_case(func, feed_dict, [], output_names_with_port, **kwargs)
-
+    '''
     def _test_expand_dims_known_rank(self, idx):
         x_val = make_xval([3, 4])
         def func(x):
@@ -3351,6 +3358,26 @@ class BackendTests(Tf2OnnxBackendTestBase):
             return tf.raw_ops.MatrixSetDiagV3(input=base_matrix, diagonal=diag, k=k, align='RIGHT_LEFT', name=_TFOUTPUT)
 
         self._run_test_case(func, [_OUTPUT], {_INPUT: input_val, _INPUT1: diag_val, _INPUT2: k_val})
+    '''
+    @check_opset_min_version(8)
+    @check_tf_min_version("1.15")
+    def test_conv_fuze(self):
+
+        x_val = np.random.rand(1, 100, 100, 3).astype(np.float32)
+        w = np.random.rand(100, 100, 3, 64).astype(np.float32)
+        b = np.random.rand(64).astype(np.float32)
+        m = np.random.rand(64).astype(np.float32)
+        v = np.random.rand(64).astype(np.float32)
+        o = np.random.rand(64).astype(np.float32)
+        s = np.random.rand(64).astype(np.float32)
+
+        def func(x):
+            conv = tf.nn.conv2d(x, w, strides=[1, 2, 2, 1], padding='VALID', dilations=[1,1,1,1], data_format='NHWC')
+            bias = tf.nn.bias_add(conv, b, data_format='NHWC')
+            fuse, _, _ = fused_batch_norm(x=bias, mean=m, variance=v, offset=o, scale=s, epsilon=0.012345, is_training=False, name=_TFOUTPUT)
+            return tf.identity(fuse, name=_TFOUTPUT)
+
+        self._run_test_case(func, [_OUTPUT], {_INPUT: x_val})
 
 
 if __name__ == '__main__':
