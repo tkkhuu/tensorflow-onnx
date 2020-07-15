@@ -3359,7 +3359,7 @@ class BackendTests(Tf2OnnxBackendTestBase):
     def test_fakequant_with_min_max(self):
         x_val = np.random.random(size=[4, 5]).astype(np.float32) * 2048. - 1024.
         def func(x):
-            ret = tf.quantization.fake_quant_with_min_max_vars(
+            ret = fake_quant_with_min_max_args(
                 x, min=-1024, max=1024, num_bits=8, narrow_range=False, name=None)
             return tf.identity(ret, name=_TFOUTPUT)
         self._run_test_case(func, [_OUTPUT], {_INPUT: x_val})
